@@ -29,4 +29,4 @@ const corsOptions: cors.CorsOptions = {
   ]
 };
 
-export default corsOptions;
+export default cors(corsOptions);

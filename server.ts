@@ -1,10 +1,11 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
+import corsMiddleware from './src/utils/cors.js';
 import globalErrorHandler from './src/middleware/errorHandler.js';
 import logger from './src/utils/logger.js';
 import { dbConnect } from './src/config/ConnectToDB.js';
-// import corsOptions from './src/utils/cors';
+import userRoutes from './src/routes/userRoutes.js';
 
 dotenv.config();
 
@@ -12,6 +13,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
+app.use(corsMiddleware);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -20,6 +22,8 @@ app.use(cookieParser());
 app.get('/', (req, res) => {
   res.json({ message: 'Google Docs API is running!' });
 });
+
+app.use('/api/users', userRoutes);
 
 // Global error handler (must be last)
 app.use(globalErrorHandler);
