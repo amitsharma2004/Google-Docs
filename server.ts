@@ -6,6 +6,7 @@ import globalErrorHandler from './src/middleware/errorHandler.js';
 import logger from './src/utils/logger.js';
 import { dbConnect } from './src/config/ConnectToDB.js';
 import userRoutes from './src/routes/userRoutes.js';
+import commentRoutes from './src/routes/commentRoutes.js';
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/users', userRoutes);
+app.use('/api', commentRoutes);
 
 // Global error handler (must be last)
 app.use(globalErrorHandler);
