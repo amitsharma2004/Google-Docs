@@ -1,4 +1,5 @@
 import express from 'express';
+import http from 'http';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import corsMiddleware from './src/utils/cors.js';
@@ -7,11 +8,15 @@ import logger from './src/utils/logger.js';
 import { dbConnect } from './src/config/ConnectToDB.js';
 import userRoutes from './src/routes/userRoutes.js';
 import commentRoutes from './src/routes/commentRoutes.js';
+import { SocketServer } from './src/services/websocket/socketServer.js';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Create HTTP server
+const httpServer = http.createServer(app);
 
 // Middleware
 app.use(corsMiddleware);
@@ -34,8 +39,13 @@ app.use(globalErrorHandler);
 const startServer = async () => {
   try {
     await dbConnect();
-    app.listen(PORT, () => {
+    
+    // Initialize WebSocket server
+    new SocketServer(httpServer);
+    
+    httpServer.listen(PORT, () => {
       logger.info(`Server is running on port ${PORT}`);
+      logger.info(`WebSocket server is ready`);
     });
   } catch (error) {
     logger.error('Failed to start server:', error);

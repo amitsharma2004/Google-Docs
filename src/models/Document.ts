@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
+import { Operation } from '../types/operations.js';
 
 export interface IAsset {
   url: string;
@@ -21,6 +22,9 @@ export interface IDocument extends Document {
   assets: IAsset[];
   isPublic: boolean;
   lastEditedBy?: Types.ObjectId;
+  version: number;
+  operations: Operation[];
+  lastModified: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -100,6 +104,19 @@ const documentSchema = new Schema<IDocument>(
     lastEditedBy: {
       type: Schema.Types.ObjectId,
       ref: 'User'
+    },
+    lastModified: {
+      type: Date,
+      default: Date.now
+    },
+    version: {
+      type: Number,
+      default: 1,
+      min: 1
+    },
+    operations: {
+      type: [],
+      default: []
     }
   },
   {
