@@ -234,9 +234,32 @@ export function useCollaboration({
   // ── Join doc room on mount ────────────────────────────────────────────────
 
   useEffect(() => {
+    // Guard: Don't join if docId is invalid
+    if (!docId || docId === 'undefined') {
+      console.error('[useCollaboration] Invalid docId, not joining:', docId);
+      return;
+    }
+
+    // Only join if socket is connected
+    if (!socket.connected) {
+      const handleConnect = () => {
+        console.log('[useCollaboration] Socket connected, joining doc:', docId);
+        socket.emit('join-doc', { docId, fromVersion: knownVersion.current });
+      };
+      socket.once('connect', handleConnect);
+      return () => {
+        socket.off('connect', handleConnect);
+      };
+    }
+    
+    // Socket already connected, join immediately
+    console.log('[useCollaboration] Socket already connected, joining doc:', docId);
     socket.emit('join-doc', { docId, fromVersion: knownVersion.current });
+    
     return () => {
-      socket.emit('leave-doc', { docId });
+      if (docId && docId !== 'undefined') {
+        socket.emit('leave-doc', { docId });
+      }
     };
   }, [socket, docId]);
 

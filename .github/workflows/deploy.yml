@@ -1,0 +1,88 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: |
+            server/package-lock.json
+            client/package-lock.json
+      
+      - name: Install server dependencies
+        working-directory: ./server
+        run: npm ci
+      
+      - name: Install client dependencies
+        working-directory: ./client
+        run: npm ci
+      
+      - name: Build server
+        working-directory: ./server
+        run: npm run build
+      
+      - name: Build client
+        working-directory: ./client
+        run: npm run build
+
+  deploy-server:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile.server
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/gdocs-server:latest
+      
+      # Add your deployment steps here
+      # Example: Deploy to AWS, Heroku, DigitalOcean, etc.
+
+  deploy-client:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        working-directory: ./client
+        run: npm ci
+      
+      - name: Build
+        working-directory: ./client
+        run: npm run build:prod
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_SOCKET_URL: ${{ secrets.VITE_SOCKET_URL }}
+      
+      # Add your deployment steps here
+      # Example: Deploy to Netlify, Vercel, S3, etc.

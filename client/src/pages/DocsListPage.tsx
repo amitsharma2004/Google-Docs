@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { fetchDocs, createDoc, deleteDoc } from '../store/docSlice';
 import { logout } from '../store/authSlice';
 import ThemeToggle from '../components/ThemeToggle';
+import ShareModal from '../components/ShareModal';
 import type { AppDispatch, RootState } from '../store';
 
   const DocsListPage: React.FC = () => {
@@ -16,6 +17,7 @@ import type { AppDispatch, RootState } from '../store';
   const { list, loading } = useSelector((s: RootState) => s.docs);
   const { user }          = useSelector((s: RootState) => s.auth);
   const [newTitle, setNewTitle] = useState('');
+  const [shareDocId, setShareDocId] = useState<string | null>(null);
 
   useEffect(() => { dispatch(fetchDocs()); }, [dispatch]);
 
@@ -87,16 +89,28 @@ import type { AppDispatch, RootState } from '../store';
                     {new Date(doc.updatedAt).toLocaleDateString()}
                   </span>
                 </div>
-                <button
-                  className="doc-card-delete"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    dispatch(deleteDoc(doc._id));
-                  }}
-                  title="Delete"
-                >
-                  ×
-                </button>
+                <div className="doc-card-actions">
+                  <button
+                    className="doc-card-share"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShareDocId(doc._id);
+                    }}
+                    title="Share"
+                  >
+                    🔗
+                  </button>
+                  <button
+                    className="doc-card-delete"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      dispatch(deleteDoc(doc._id));
+                    }}
+                    title="Delete"
+                  >
+                    ×
+                  </button>
+                </div>
               </div>
             ))
           ) : (
@@ -104,6 +118,15 @@ import type { AppDispatch, RootState } from '../store';
           )}
         </div>
       </div>
+
+      {/* Share Modal */}
+      {shareDocId && (
+        <ShareModal 
+          docId={shareDocId}
+          isOpen={true}
+          onClose={() => setShareDocId(null)}
+        />
+      )}
     </div>
   );
 };

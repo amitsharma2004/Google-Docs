@@ -25,10 +25,17 @@ const DocEditorPage: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    if (!token || !docId) { 
-      console.log('[DocEditor] Missing token or docId, redirecting...', { token: !!token, docId });
-      navigate('/'); 
-      return; 
+    // Guard: Don't create socket if token or docId is missing
+    if (!token) {
+      console.log('[DocEditor] No token, redirecting to login');
+      navigate('/login');
+      return;
+    }
+
+    if (!docId || docId === 'undefined') {
+      console.log('[DocEditor] Invalid docId, redirecting to home');
+      navigate('/');
+      return;
     }
 
     console.log('[DocEditor] Creating socket connection...', { SOCKET_URL, docId });

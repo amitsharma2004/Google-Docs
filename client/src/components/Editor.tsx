@@ -13,6 +13,7 @@ import 'quill/dist/quill.snow.css';
 import { Socket } from 'socket.io-client';
 import { useCollaboration } from '../hooks/useCollaboration';
 import ThemeToggle from './ThemeToggle';
+import ShareModal from './ShareModal';
 
 interface EditorProps {
   docId: string;
@@ -67,6 +68,7 @@ const Editor: React.FC<EditorProps> = ({
   const [cursors, setCursors]         = useState<Map<string, CursorInfo>>(new Map());
   const [editingTitle, setEditingTitle] = useState(false);
   const [localTitle, setLocalTitle]   = useState(title);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // ── Initialise Quill once ────────────────────────────────────────────
   useEffect(() => {
@@ -191,6 +193,13 @@ const Editor: React.FC<EditorProps> = ({
 
         {/* Active collaborators indicator */}
         <div className="editor-collaborators">
+          <button 
+            className="btn-share" 
+            onClick={() => setShowShareModal(true)}
+            title="Share document"
+          >
+            🔗 Share
+          </button>
           <ThemeToggle />
           {Array.from(cursors.values()).map((c) => (
             <span
@@ -207,6 +216,13 @@ const Editor: React.FC<EditorProps> = ({
 
       {/* Quill editor mount point */}
       <div className="editor-container" ref={editorRef} />
+
+      {/* Share Modal */}
+      <ShareModal 
+        docId={docId}
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+      />
     </div>
   );
 };

@@ -33,7 +33,9 @@ export const register = createAsyncThunk(
   'auth/register',
   async (payload: { email: string; password: string; name: string }, { rejectWithValue }) => {
     try {
-      const { data } = await axios.post(`${API}/auth/register`, payload);
+      const { data } = await axios.post(`${API}/auth/register`, payload, {
+        withCredentials: true  // Send cookies with request
+      });
       return data as { token: string; user: UserInfo };
     } catch (e: any) {
       return rejectWithValue(e.response?.data?.error ?? 'Registration failed');
@@ -45,7 +47,9 @@ export const login = createAsyncThunk(
   'auth/login',
   async (payload: { email: string; password: string }, { rejectWithValue }) => {
     try {
-      const { data } = await axios.post(`${API}/auth/login`, payload);
+      const { data } = await axios.post(`${API}/auth/login`, payload, {
+        withCredentials: true  // Send cookies with request
+      });
       return data as { token: string; user: UserInfo };
     } catch (e: any) {
       return rejectWithValue(e.response?.data?.error ?? 'Login failed');

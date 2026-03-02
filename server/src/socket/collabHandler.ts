@@ -92,24 +92,38 @@ export function registerCollabHandlers(io: Server, socket: Socket, redis: Redis)
    * If the client sends a `fromVersion`, we replay missed ops so it catches up.
    */
   socket.on('join-doc', async ({ docId, fromVersion }: { docId: string; fromVersion?: number }) => {
-    await socket.join(docId);
-
-    const doc = await DocumentService.getDocument(docId);
-    if (!doc) {
-      socket.emit('error', { message: 'Document not found' });
+    // Validate docId
+    if (!docId || docId === 'undefined') {
+      logger.error(`[join-doc] Invalid docId: ${docId} from socket ${socket.id}`);
+      socket.emit('error', { message: 'Invalid document ID' });
       return;
     }
 
-    if (fromVersion !== undefined && fromVersion < doc.version) {
-      // Reconnect replay: send only the ops the client missed
-      const missedOps = await DocumentService.getOperationsSince(docId, fromVersion);
-      socket.emit('catchup-ops', { ops: missedOps, currentVersion: doc.version });
-    } else {
-      // Fresh join: send full snapshot
-      socket.emit('doc-snapshot', {
-        content: doc.content,
-        version: doc.version,
-      });
+    logger.info(`[join-doc] Socket ${socket.id} joining doc ${docId}`);
+    await socket.join(docId);
+
+    try {
+      const doc = await DocumentService.getDocument(docId);
+      if (!doc) {
+        logger.error(`[join-doc] Document not found: ${docId}`);
+        socket.emit('error', { message: 'Document not found' });
+        return;
+      }
+
+      if (fromVersion !== undefined && fromVersion < doc.version) {
+        // Reconnect replay: send only the ops the client missed
+        const missedOps = await DocumentService.getOperationsSince(docId, fromVersion);
+        socket.emit('catchup-ops', { ops: missedOps, currentVersion: doc.version });
+      } else {
+        // Fresh join: send full snapshot
+        socket.emit('doc-snapshot', {
+          content: doc.content,
+          version: doc.version,
+        });
+      }
+    } catch (error: any) {
+      logger.error(`[join-doc] Error: ${error.message}`, { docId, error });
+      socket.emit('error', { message: 'Failed to join document' });
     }
   });
 

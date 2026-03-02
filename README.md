@@ -221,6 +221,47 @@ npm run preview
 - Check CORS settings in `server/src/app.ts`
 - Verify CLIENT_ORIGIN matches your client URL
 
+## Production Deployment
+
+### Quick Deploy with Docker
+
+```bash
+# Set JWT secret
+echo "JWT_SECRET=$(openssl rand -base64 32)" > .env
+
+# Start all services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+```
+
+Access the application:
+- Frontend: http://localhost:3000
+- Backend: http://localhost:5000
+
+### Manual Deployment
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions including:
+- Docker deployment
+- Manual deployment
+- Cloud deployment (AWS, Heroku, DigitalOcean)
+- Nginx configuration
+- SSL setup
+- Scaling strategies
+
+## Production Checklist
+
+Before deploying to production:
+- [ ] Change JWT_SECRET to a strong random value
+- [ ] Configure CORS with your frontend domain
+- [ ] Enable HTTPS/SSL
+- [ ] Set up MongoDB authentication
+- [ ] Configure Redis password
+- [ ] Set up monitoring and logging
+- [ ] Configure automated backups
+- [ ] Test disaster recovery
+
 ## License
 
 MIT

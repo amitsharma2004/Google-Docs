@@ -7,6 +7,7 @@
 import express from 'express';
 import http from 'http';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import mongoose from 'mongoose';
 import { Server as SocketServer } from 'socket.io';
 import Redis from 'ioredis';
@@ -19,21 +20,43 @@ import logger from './utils/logger';
 import { requestLogger } from './middleware/requestLogger';
 
 export async function createApp() {
-  // ── Express setup ─────────────────────────────────────────────────────
+  // Express setup
   const app  = express();
   const httpServer = http.createServer(app);
 
   app.use(cors({ origin: process.env.CLIENT_ORIGIN ?? 'http://localhost:5173', credentials: true }));
   app.use(express.json());
+  app.use(cookieParser());
   app.use(requestLogger); // Log all incoming requests
 
-  // ── REST Routes ───────────────────────────────────────────────────────
+  //  REST Routes 
   app.use('/api/auth', authRoutes);
   app.use('/api/docs', docRoutes);
 
-  app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+  // Health check endpoint
+  app.get('/health', (_req, res) => {
+    res.json({ 
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      environment: process.env.NODE_ENV || 'development'
+    });
+  });
 
-  // ── MongoDB ───────────────────────────────────────────────────────────
+  // API info endpoint
+  app.get('/api', (_req, res) => {
+    res.json({
+      name: 'Google Docs Clone API',
+      version: '1.0.0',
+      endpoints: {
+        auth: '/api/auth',
+        docs: '/api/docs',
+        health: '/health'
+      }
+    });
+  });
+
+  //  MongoDB
   const mongoUri = process.env.MONGO_URI ?? 'mongodb://localhost:27017/gdocs';
   await mongoose.connect(mongoUri);
   

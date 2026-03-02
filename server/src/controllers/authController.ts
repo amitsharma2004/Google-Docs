@@ -36,7 +36,23 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     user.refreshToken = refreshToken;
     await user.save();
 
+    // Set HTTP-only cookies (more secure than localStorage)
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 15 * 60 * 1000 // 15 minutes
+    });
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
     res.status(201).json({ 
+      token: accessToken,  // Also send in response for localStorage fallback
       accessToken,
       refreshToken,
       user: { id: user.id, email: user.email, name: user.name } 
@@ -73,7 +89,23 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     user.refreshToken = refreshToken;
     await user.save();
 
+    // Set HTTP-only cookies (more secure than localStorage)
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 15 * 60 * 1000 // 15 minutes
+    });
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
     res.json({ 
+      token: accessToken,  // Also send in response for localStorage fallback
       accessToken,
       refreshToken,
       user: { id: user.id, email: user.email, name: user.name } 
@@ -131,6 +163,10 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
       // Remove refresh token from database
       await User.findByIdAndUpdate(userId, { $unset: { refreshToken: 1 } });
     }
+
+    // Clear cookies
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken');
 
     res.json({ message: 'Logged out successfully' });
   } catch (error: any) {
