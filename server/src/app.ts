@@ -14,6 +14,7 @@ import Redis from 'ioredis';
 
 import authRoutes from './routes/authRoutes';
 import docRoutes  from './routes/docRoutes';
+import commentRoutes from './routes/commentRoutes';
 import { socketAuthenticate } from './middleware/auth';
 import { registerCollabHandlers } from './socket/collabHandler';
 import logger from './utils/logger';
@@ -32,6 +33,7 @@ export async function createApp() {
   //  REST Routes 
   app.use('/api/auth', authRoutes);
   app.use('/api/docs', docRoutes);
+  app.use('/api/comments', commentRoutes);
 
   // Health check endpoint
   app.get('/health', (_req, res) => {
@@ -83,6 +85,9 @@ export async function createApp() {
       credentials: true,
     },
   });
+
+  // Make io available to routes via app.locals
+  app.locals.io = io;
 
   // JWT auth on every socket connection (monolithic guard)
   io.use(socketAuthenticate);

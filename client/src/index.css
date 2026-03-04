@@ -171,6 +171,18 @@ body {
   border-color: var(--border-color) !important;
 }
 
+/* Hide duplicate toolbars - only show the first one */
+.editor-container .ql-toolbar:not(:first-of-type) {
+  display: none !important;
+}
+
+/* Ensure toolbar is properly positioned */
+.editor-container .ql-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
 .editor-container .ql-stroke {
   stroke: var(--text-primary) !important;
 }
@@ -507,4 +519,15 @@ body {
 /* Update existing doc-card styles */
 .doc-card {
   position: relative;
+}
+
+/* Comment highlight styles */
+.comment-highlight {
+  background-color: rgba(255, 235, 59, 0.3);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.comment-highlight:hover {
+  background-color: rgba(255, 235, 59, 0.5);
 }

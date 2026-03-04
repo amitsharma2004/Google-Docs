@@ -16,6 +16,11 @@ export interface JwtPayload {
   email: string;
 }
 
+// ── AuthRequest interface for authenticated routes ───────────────────────
+export interface AuthRequest extends Request {
+  user?: JwtPayload;
+}
+
 // ── Extend Express Request to carry decoded user ──────────────────────────
 declare global {
   namespace Express {
@@ -27,11 +32,17 @@ declare global {
 
 /**
  * authenticate — Express middleware.
- * Reads Bearer token from Authorization header, verifies, attaches user.
+ * Reads token from Authorization header (Bearer) or cookies (accessToken), verifies, attaches user.
  */
 export function authenticate(req: Request, res: Response, next: NextFunction): void {
+  // Try to get token from Authorization header first
   const header = req.headers.authorization ?? '';
-  const token = header.startsWith('Bearer ') ? header.slice(7) : null;
+  let token = header.startsWith('Bearer ') ? header.slice(7) : null;
+
+  // If no Bearer token, try to get from cookies (accessToken)
+  if (!token && req.cookies?.accessToken) {
+    token = req.cookies.accessToken;
+  }
 
   if (!token) {
     res.status(401).json({ error: 'Missing auth token' });
