@@ -11,15 +11,10 @@ export default function CommentButton({ position, onAddComment, onCancel }: Comm
   const [commentText, setCommentText] = useState('');
 
   const handleSubmit = () => {
-    console.log('CommentButton handleSubmit called');
-    console.log('Comment text:', commentText);
     if (commentText.trim()) {
-      console.log('Calling onAddComment with:', commentText);
       onAddComment(commentText);
       setCommentText('');
       setIsWriting(false);
-    } else {
-      console.log('Comment text is empty, not submitting');
     }
   };
 
@@ -70,7 +65,6 @@ export default function CommentButton({ position, onAddComment, onCancel }: Comm
             autoFocus
             value={commentText}
             onChange={(e) => {
-              console.log('Textarea value changed:', e.target.value);
               setCommentText(e.target.value);
             }}
             placeholder="Write a comment..."

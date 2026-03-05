@@ -31,7 +31,7 @@ const initialState: AuthState = {
 
 export const register = createAsyncThunk(
   'auth/register',
-  async (payload: { email: string; password: string; name: string }, { rejectWithValue }) => {
+  async (payload: { email: string; password: string; name: string; username?: string; otp: string }, { rejectWithValue }) => {
     try {
       const { data } = await axios.post(`${API}/auth/register`, payload, {
         withCredentials: true  // Send cookies with request

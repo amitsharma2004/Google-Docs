@@ -27,18 +27,14 @@ const DocEditorPage: React.FC = () => {
   useEffect(() => {
     // Guard: Don't create socket if token or docId is missing
     if (!token) {
-      console.log('[DocEditor] No token, redirecting to login');
       navigate('/login');
       return;
     }
 
     if (!docId || docId === 'undefined') {
-      console.log('[DocEditor] Invalid docId, redirecting to home');
       navigate('/');
       return;
     }
-
-    console.log('[DocEditor] Creating socket connection...', { SOCKET_URL, docId });
     
     socketRef.current = io(SOCKET_URL, {
       auth: { token },
@@ -46,7 +42,6 @@ const DocEditorPage: React.FC = () => {
     });
 
     socketRef.current.on('connect', () => {
-      console.log('[Socket] Connected successfully');
       setIsConnected(true);
     });
 
@@ -56,12 +51,10 @@ const DocEditorPage: React.FC = () => {
     });
 
     socketRef.current.on('disconnect', () => {
-      console.log('[Socket] Disconnected');
       setIsConnected(false);
     });
 
     return () => {
-      console.log('[DocEditor] Cleaning up socket connection');
       socketRef.current?.disconnect();
       socketRef.current = null;
       setIsConnected(false);
@@ -81,8 +74,6 @@ const DocEditorPage: React.FC = () => {
     if (!isConnected) reasons.push('not connected');
     if (!docId) reasons.push('no docId');
     if (!user) reasons.push('no user');
-    
-    console.log('[DocEditor] Waiting...', reasons);
     
     return (
       <div className="editor-loading">

@@ -243,7 +243,6 @@ export function useCollaboration({
     // Only join if socket is connected
     if (!socket.connected) {
       const handleConnect = () => {
-        console.log('[useCollaboration] Socket connected, joining doc:', docId);
         socket.emit('join-doc', { docId, fromVersion: knownVersion.current });
       };
       socket.once('connect', handleConnect);
@@ -253,7 +252,6 @@ export function useCollaboration({
     }
     
     // Socket already connected, join immediately
-    console.log('[useCollaboration] Socket already connected, joining doc:', docId);
     socket.emit('join-doc', { docId, fromVersion: knownVersion.current });
     
     return () => {

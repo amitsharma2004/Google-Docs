@@ -146,13 +146,17 @@ const Editor: React.FC<EditorProps> = ({
       
       if (!startNode || !endNode) return null;
 
-      const range = document.createRange();
-      range.setStart(startNode, startOffset);
-      range.setEnd(endNode, endOffset);
-      
-      return range;
+      try {
+        const range = document.createRange();
+        range.setStart(startNode, startOffset);
+        range.setEnd(endNode, endOffset);
+        return range;
+      } catch (rangeError) {
+        // Range creation failed - offsets are invalid
+        return null;
+      }
     } catch (error) {
-      console.error('Error restoring selection:', error);
+      // Silently fail - comment position is no longer valid
       return null;
     }
   }, []);
@@ -215,12 +219,7 @@ const Editor: React.FC<EditorProps> = ({
 
   // ── Add comment ──────────────────────────────────────────────────────
   const handleAddComment = useCallback(async () => {
-    console.log('handleAddComment called');
-    console.log('commentText:', commentText);
-    console.log('selectionData:', selectionData);
-    
     if (!selectionData || !commentText.trim()) {
-      console.log('No selection data or empty comment, returning');
       return;
     }
 
@@ -234,9 +233,7 @@ const Editor: React.FC<EditorProps> = ({
       comment: commentText,
     };
     
-    console.log('Sending comment payload:', payload);
     const url = `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/comments`;
-    console.log('API URL:', url);
 
     try {
       const response = await fetch(url, {
@@ -246,12 +243,8 @@ const Editor: React.FC<EditorProps> = ({
         body: JSON.stringify(payload),
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response ok:', response.ok);
-
       if (response.ok) {
         const newComment = await response.json();
-        console.log('New comment created:', newComment);
         setComments(prev => {
           const updated = [...prev, newComment];
           highlightComments(updated);
@@ -424,7 +417,6 @@ const Editor: React.FC<EditorProps> = ({
   // ── Listen for real-time comment updates ─────────────────────────────
   useEffect(() => {
     const handleCommentAdded = (newComment: Comment) => {
-      console.log('New comment received via socket:', newComment);
       setComments(prev => {
         const updated = [...prev, newComment];
         highlightComments(updated);
@@ -433,7 +425,6 @@ const Editor: React.FC<EditorProps> = ({
     };
 
     const handleCommentReplyAdded = (updatedComment: Comment) => {
-      console.log('Comment reply received via socket:', updatedComment);
       setComments(prev => {
         const updated = prev.map(c => c._id === updatedComment._id ? updatedComment : c);
         return updated;
@@ -445,7 +436,6 @@ const Editor: React.FC<EditorProps> = ({
     };
 
     const handleCommentDeleted = ({ commentId }: { commentId: string }) => {
-      console.log('Comment deleted via socket:', commentId);
       setComments(prev => {
         const updated = prev.filter(c => c._id !== commentId);
         highlightComments(updated);
@@ -590,7 +580,6 @@ const Editor: React.FC<EditorProps> = ({
           {!showCommentInput ? (
             <button
               onClick={() => {
-                console.log('Add Comment button clicked');
                 setShowCommentInput(true);
               }}
               style={{
@@ -628,7 +617,6 @@ const Editor: React.FC<EditorProps> = ({
                 autoFocus
                 value={commentText}
                 onChange={(e) => {
-                  console.log('Textarea value changed:', e.target.value);
                   setCommentText(e.target.value);
                 }}
                 placeholder="Write a comment..."
@@ -655,7 +643,6 @@ const Editor: React.FC<EditorProps> = ({
               <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
                 <button
                   onClick={() => {
-                    console.log('Comment button clicked');
                     handleAddComment();
                   }}
                   disabled={!commentText.trim()}
@@ -684,7 +671,6 @@ const Editor: React.FC<EditorProps> = ({
                 </button>
                 <button
                   onClick={() => {
-                    console.log('Cancel button clicked');
                     setSelectionData(null);
                     setShowCommentInput(false);
                     setCommentText('');

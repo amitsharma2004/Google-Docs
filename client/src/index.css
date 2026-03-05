@@ -56,6 +56,7 @@ body {
 .auth-logo span { font-size: 22px; font-weight: 600; color: var(--accent-color); }
 .auth-card h2 { font-size: 24px; font-weight: 400; color: var(--text-primary); margin-bottom: 24px; }
 .auth-error { background: var(--error-bg); color: var(--error-text); padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 14px; }
+.auth-success { background: #d4edda; color: #155724; padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 14px; border: 1px solid #c3e6cb; }
 .auth-form { display: flex; flex-direction: column; gap: 14px; }
 .auth-form input {
   border: 1px solid var(--border-color); border-radius: 6px; padding: 12px 14px;

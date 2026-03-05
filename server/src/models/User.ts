@@ -10,6 +10,8 @@ export interface IUser extends Document {
   email: string;
   password: string;
   name: string;
+  username: string;
+  emailVerified: boolean;
   refreshToken?: string;
   createdAt: Date;
   comparePassword(candidate: string): Promise<boolean>;
@@ -21,6 +23,8 @@ const UserSchema = new Schema<IUser>(
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, required: true, minlength: 6 },
     name:  { type: String, required: true, trim: true },
+    username: { type: String, required: true, trim: true },
+    emailVerified: { type: Boolean, default: false },
     refreshToken: { type: String },
   },
   { timestamps: true },
